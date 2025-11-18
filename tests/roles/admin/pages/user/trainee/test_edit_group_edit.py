@@ -9,13 +9,14 @@ def test_edit_group(login_as_admin_fixture):
     driver = login_as_admin_fixture
     wait = WebDriverWait(driver, 15)
 
-    original_name = "Group D"
-    edited_name = "Group D Edited"
+    # ⚙️ Gunakan nama unik khusus test edit
+    original_name = "Group_Edit_Test"
+    edited_name = "Group_Edit_Test_Edited"
 
     # --- Step 1: Pastikan group ada (add dulu jika belum)
     open_edit_dialog(driver, wait)
     delete_group_if_exists(driver, wait, original_name)
-    delete_group_if_exists(driver, wait, edited_name) 
+    delete_group_if_exists(driver, wait, edited_name)
 
     print("➕ Menambahkan group baru untuk diedit...")
     add_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Add New Group')]")))

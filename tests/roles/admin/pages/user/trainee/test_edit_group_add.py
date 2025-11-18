@@ -10,23 +10,27 @@ def test_add_new_group(login_as_admin_fixture):
     wait = WebDriverWait(driver, 15)
     group_name = "Group D"
 
-    open_edit_dialog(driver, wait)
+    # Setup: Pastikan group yang akan ditambahkan tidak ada
+    open_group_edit_dialog(driver, wait)
     delete_group_if_exists(driver, wait, group_name)
+    
+    # 1. Klik 'Add New Group' dan tunggu input muncul
+    click_add_new_group(driver, wait)
 
-    print("➕ Klik tombol 'Add New Group'...")
-    add_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Add New Group')]")))
-    safe_click(driver, add_btn)
-
-    group_input = wait.until(EC.presence_of_element_located((By.NAME, "groupname")))
+    # 2. Isi Nama Group
+    group_input = driver.find_element(By.NAME, "groupname")
     group_input.clear()
     group_input.send_keys(group_name)
 
-    save_icon = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@aria-label='Simpan']")))
-    parent = save_icon.find_element(By.XPATH, "./ancestor::*[self::button or self::div][1]")
-    driver.execute_script("arguments[0].click();", parent)
-
+    # 3. Simpan
+    click_save_button(driver, wait)
+    
+    # 4. Verifikasi (tutup, buka, dan cek daftar)
     close_dialog(driver, wait)
-    open_edit_dialog(driver, wait)
+    open_group_edit_dialog(driver, wait)
 
-    assert group_name in get_group_names(driver, wait), f"❌ '{group_name}' tidak ditemukan!"
+    assert group_name in get_group_names(driver, wait), f"❌ '{group_name}' tidak ditemukan setelah ditambahkan!"
     print(f"✅ '{group_name}' berhasil ditambahkan.")
+
+    # Cleanup: Tutup dialog
+    close_dialog(driver, wait)

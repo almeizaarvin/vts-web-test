@@ -73,3 +73,5 @@ chromedriver.log
 
 # Docker
 *.tar
+
+jenkins_home/

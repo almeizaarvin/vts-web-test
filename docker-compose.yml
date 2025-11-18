@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  jenkins:
+    build: ./jenkins
+    container_name: jenkins-ci
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - ./jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock # supaya Jenkins bisa jalanin docker run
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    restart: unless-stopped
+
+  vts-ui-test:
+    build: .
+    container_name: vts-ui-test
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    entrypoint: ["pytest", "--disable-warnings", "-q"]
