@@ -8,11 +8,14 @@ from tests.helper.edit_group_helper import *
 def test_edit_group_edit(login_as_admin_fixture):
     driver = login_as_admin_fixture
     wait = WebDriverWait(driver, 15)
-    original_name = "A_Group_to_Edit"
-    edited_name = "A_Group_to_Edit_Success"
-    
-    # 1. SETUP: Pastikan group yang akan diedit ada
-    create_group_for_edit(driver, wait, original_name)
-    
-    # 2. CORE ACTION: Lakukan Edit dan Verifikasi
+
+    # ⚙️ Nama unik untuk skenario ini
+    original_name = "Group_Edit_Inst_Nav"
+    edited_name = "Group_Edit_Inst_Nav_EDITED"
+
+    # --- STEP 1: NAVIGASI ---
+    navigate_to_instructor_subpage(driver, wait) 
+
+    # --- STEP 2: CORE ACTION ---
+    # Panggil fungsi inti untuk melakukan ADD -> EDIT -> VERIFY -> CLEANUP
     perform_edit_group_and_verify(driver, wait, original_name, edited_name)

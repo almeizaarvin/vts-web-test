@@ -4,7 +4,7 @@ import base64
 from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
 from .helper.browser_setup import create_driver
-from .helper.login_helper import login_as_admin
+from .helper.login_helper import *
 
 @pytest.fixture(scope="session")
 def driver():
@@ -13,13 +13,17 @@ def driver():
     yield driver
     driver.quit()
 
-
 @pytest.fixture(scope="function")
 def login_as_admin_fixture(driver):
-    """Login sebelum test"""
+    """Fixture untuk login sebagai Admin sebelum setiap test"""
     login_as_admin(driver)
     return driver
 
+@pytest.fixture(scope="function")
+def login_as_instructor_fixture(driver):
+    """Fixture BARU untuk login sebagai Instructor sebelum setiap test"""
+    login_as_instructor(driver)
+    return driver
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
