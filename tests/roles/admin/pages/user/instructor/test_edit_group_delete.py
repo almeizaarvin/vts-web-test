@@ -8,22 +8,24 @@ def test_delete_group(login_as_admin_fixture):
     wait = WebDriverWait(driver, 15)
     group_name = "Group_Untuk_Hapus"
     
+    navigate_to_instructor_subpage(driver, wait)
+    
     # -----------------------------------------------------------
     # 🎯 STEP 1: SETUP (Pastikan Group ada sebelum Dihapus)
     # -----------------------------------------------------------
     print(f"\n--- SETUP: Mempersiapkan '{group_name}' untuk dihapus ---")
     open_edit_dialog(driver, wait)
     
-    # 1a. Bersihkan jika sudah ada (untuk memastikan kita mulai dari kondisi bersih)
+    # Bersihkan jika sudah ada (untuk memastikan kita mulai dari kondisi bersih)
     delete_group_if_exists(driver, wait, group_name)
     
-    # 1b. Tambahkan Group baru
+    # Tambahkan Group baru
     click_add_new_group(driver, wait)
     group_input = driver.find_element(By.NAME, "groupname")
     group_input.send_keys(group_name)
     click_save_button(driver, wait)
     
-    # 1c. Refresh dan verifikasi Group berhasil dibuat
+    # Refresh dan verifikasi Group berhasil dibuat
     close_dialog(driver, wait)
     open_edit_dialog(driver, wait)
     assert group_name in get_group_names(driver, wait), f"❌ SETUP GAGAL: '{group_name}' tidak ditemukan setelah add!"

@@ -3,6 +3,7 @@ Helper functions untuk VTS UI Test
 Berisi semua fungsi pembantu yang digunakan dalam automation testing
 """
 
+import re
 import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -347,49 +348,23 @@ def open_group_edit_dropdown(driver, wait):
 
 def find_row_by_name(driver, wait, name):
     """
-    Mencari row berdasarkan nama di kolom pertama tabel.
-    
-    Args:
-        driver: WebDriver instance
-        wait: WebDriverWait instance
-        name: Nama yang dicari di kolom pertama
-    
-    Returns:
-        WebElement: Row yang ditemukan
-    
-    Raises:
-        Exception: Jika row tidak ditemukan
+    Mencari row berdasarkan nama di kolom manapun menggunakan XPath.
+    (Lebih disarankan jika nama yang dicari unik per row)
     """
-    print(f"🔍 Mencari row dengan nama '{name}'...")
-    rows = wait.until(EC.presence_of_all_elements_located(
-        (By.XPATH, "//table//tbody/tr")
-    ))
-
-    for row in rows:
-        first_col = row.find_element(By.XPATH, "./td[1]") 
-        if first_col.text.strip() == name:
-            print(f"✅ Row '{name}' ditemukan.")
-            return row
-
-    raise Exception(f"❌ Row dengan nama '{name}' tidak ditemukan!")
-
-
-def find_peserta_row(driver, wait):
-    """
-    Helper spesifik untuk mencari 'Peserta 6'.
+    print(f"🔍 Mencari row dengan nama '{name}' menggunakan XPath...")
     
-    Args:
-        driver: WebDriver instance
-        wait: WebDriverWait instance
+    row_locator = (
+        By.XPATH, 
+        f"//table//tbody/tr[.//td[normalize-space(text())='{name}']]"
+    )
     
-    Returns:
-        WebElement: Row Peserta 6
-    """
-    print("🔍 Mencari row Peserta 6…")
-    row = find_row_by_name(driver, wait, "Peserta 6")
-    print("✅ Row Peserta 6 ditemukan.")
-    return row
-
+    try:
+        row = wait.until(EC.presence_of_element_located(row_locator))
+        print(f"✅ Row dengan teks '{name}' ditemukan.")
+        return row
+    except TimeoutException:
+        raise Exception(f"❌ Row dengan nama '{name}' tidak ditemukan!")
+    
 
 def open_user_details_dialog(driver, wait, row):
     """
@@ -650,3 +625,176 @@ def create_group_for_edit(driver, wait, group_name):
     
     print(f"✅ SETUP BERHASIL: '{group_name}' sudah tersedia.")
     print(f"{'='*60}\n")
+
+
+def perform_reset_password_and_verify(driver, wait, username, new_password):
+    """
+    Fungsi inti: Mencari user, Reset Password, Save, dan Verifikasi Toast.
+    
+    Args:
+        driver: WebDriver instance
+        wait: WebDriverWait instance
+        username: Nama user yang akan direset passwordnya (contoh: "Peserta 6")
+        new_password: Password baru
+        
+    Raises:
+        AssertionError: Jika verifikasi Toast gagal
+    """
+    print(f"\n{'='*60}")
+    print(f"🎯 Memulai: Reset Password untuk User '{username}'")
+    print(f"{'='*60}")
+    
+    # 1. Cari row User
+    row = find_row_by_name(driver, wait, username) # Menggunakan helper yang sudah ada
+    
+    # 2. Klik See Details
+    open_user_details_dialog(driver, wait, row)
+    
+    # 3. Cari dan klik tombol "Reset Password"
+    print("🔍 Mengklik tombol 'Reset Password'...")
+    reset_btn = wait.until(
+        EC.presence_of_element_located((By.XPATH, "//button[text()='Reset Password']")) 
+    )
+    safe_click(driver, reset_btn)
+    
+    # 4. Cari input "new-password" dan masukkan password
+    print(f"✍️ Memasukkan password baru: '{new_password}'...")
+    new_password_input = wait.until(EC.presence_of_element_located((By.ID, "new-password")))
+    new_password_input.send_keys(new_password)
+    
+    # 5. Klik tombol Save
+    print("💾 Mengklik tombol 'Save'...")
+    save_btn = wait.until(
+        EC.presence_of_element_located((By.XPATH, "//button[text()='Save']"))
+    )
+    safe_click(driver, save_btn)
+    
+    # 6. Assert Success Toast
+    wait_for_toast(wait)
+    print(f"✅ Password untuk '{username}' berhasil direset.")
+    
+    # Cleanup: Tutup dialog
+    close_dialog(driver, wait)
+    print(f"{'='*60}\n")
+
+def get_table_rows(driver, wait):
+    """Mendapatkan semua baris (<tr>) dari tbody tabel user."""
+    try:
+        table = wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
+        # Cari semua baris <tr> di dalam <tbody>
+        rows = table.find_elements(By.CSS_SELECTOR, "tbody tr")
+        return rows
+    except TimeoutException:
+        raise RuntimeError("❌ Tidak menemukan tabel user di halaman.")
+
+def perform_search_and_verify(driver, wait, query_text):
+    """
+    Fungsi inti: Mengetik query, menunggu hasil, dan memverifikasi
+    bahwa semua hasil yang ditampilkan cocok dengan query.
+    
+    Args:
+        driver: WebDriver instance
+        wait: WebDriverWait instance
+        query_text: Teks yang akan dicari
+        
+    Raises:
+        AssertionError: Jika verifikasi hasil pencarian gagal.
+    """
+    print(f"\n{'='*60}")
+    print(f"🎯 Memulai Core Action: Pencarian user dengan query '{query_text}'")
+    print(f"{'='*60}")
+
+    # 1. Cari input search
+    try:
+        search_input = wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "form input[name='query']"))
+        )
+    except TimeoutException:
+        raise RuntimeError("❌ Tidak menemukan input search (form input[name='query']).")
+
+    # 2. Ketik query dan tunggu sebentar
+    print(f"🔍 Mengetik query pencarian: '{query_text}'...")
+    search_input.clear()
+    search_input.send_keys(query_text)
+
+    # Tunggu sebentar agar AJAX/fetch data selesai (penting untuk pencarian)
+    time.sleep(2) 
+
+    # 3. Ambil baris tabel
+    rows = get_table_rows(driver, wait)
+    assert rows, f"❌ Tidak ada row ditemukan di tabel setelah pencarian dengan query '{query_text}'!"
+
+    # 4. Verifikasi setiap baris
+    matched_all = True
+    pattern = re.compile(rf"^{query_text}", re.IGNORECASE)
+    
+    print(f"🔎 Memverifikasi {len(rows)} hasil...")
+
+    for i, row in enumerate(rows, start=1):
+        cells = row.find_elements(By.TAG_NAME, "td")
+        if not cells: continue
+
+        # Asumsi kolom nama ada di kolom pertama (cells[0])
+        cell_text = cells[0].text.strip()
+        
+        if not pattern.match(cell_text):
+            matched_all = False
+            print(f"❌ Row {i} ('{cell_text}') TIDAK MATCH dengan query '{query_text}'")
+            # Tidak perlu break, kita kumpulkan semua kegagalan
+
+    # 5. Hasil Akhir
+    assert matched_all, "❌ Ada hasil pencarian yang tidak sesuai query!"
+    print(f"✅ Semua {len(rows)} hasil pencarian cocok dengan '{query_text}'.")
+    print(f"{'='*60}\n")
+    
+    # 6. (Optional) Cleanup: Clear input search jika diperlukan untuk test selanjutnya
+    # search_input.clear()
+
+
+def perform_toggle_status_and_verify(driver, wait, username):
+    """
+    Fungsi inti: Mencari user, mendeteksi status, toggle status (Activate/Deactivate), 
+    dan memverifikasi perubahan status serta toast sukses.
+    
+    Args:
+        driver: WebDriver instance
+        wait: WebDriverWait instance
+        username: Nama user yang statusnya akan diubah
+        
+    Raises:
+        AssertionError: Jika verifikasi status atau toast gagal.
+    """
+    print(f"\n{'='*60}")
+    print(f"🎯 Memulai Core Action: Toggle Status untuk User '{username}'")
+    print(f"{'='*60}")
+    
+    # 1. Cari row User
+    row = find_row_by_name(driver, wait, username) 
+    
+    # 2. Deteksi status saat ini dan klik tombol status
+    current_status_btn = get_status_button(row)
+    current_status = current_status_btn.text.strip()
+    safe_click(driver, current_status_btn)
+    print(f"🟩 Tombol status '{current_status}' diklik")
+
+    # 3. Klik tombol Aksi (Activate / Deactivate) di popup konfirmasi
+    target_status = click_status_action(driver, wait, current_status)
+    
+    # 4. Assert Success Toast
+    wait_for_toast(wait, timeout=10) # Ditingkatkan timeout-nya karena ini adalah verifikasi kunci
+
+    # 5. Cari ulang row User (fresh DOM)
+    print("🔄 Reload row untuk verifikasi status baru…")
+    # Asumsi: Halaman tidak berpindah, hanya refresh DOM/data
+    row = find_row_by_name(driver, wait, username)
+
+    # 6. Pastikan status berubah sesuai target
+    print(f"🔍 Mengecek apakah status berubah menjadi {target_status}…")
+    updated_btn = get_status_button(row)
+    
+    assert updated_btn.text.strip() == target_status, f"❌ Status tidak berubah dari {current_status} menjadi {target_status}"
+
+    print(f"✅ Status '{username}' berhasil diubah menjadi {target_status}!")
+    print(f"{'='*60}\n")
+    
+    return target_status
