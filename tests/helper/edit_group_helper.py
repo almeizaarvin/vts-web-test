@@ -432,6 +432,8 @@ def click_status_action(driver, wait, current_status):
 # SECTION 4: NAVIGATION HELPER - Fungsi untuk Navigasi Halaman
 # ============================================================================
 
+
+
 def navigate_to_instructor_subpage(driver, wait):
     """
     Menavigasi dari halaman utama 'userlist' ke subpage Instructor.
@@ -686,69 +688,6 @@ def get_table_rows(driver, wait):
         return rows
     except TimeoutException:
         raise RuntimeError("❌ Tidak menemukan tabel user di halaman.")
-
-def perform_search_and_verify(driver, wait, query_text):
-    """
-    Fungsi inti: Mengetik query, menunggu hasil, dan memverifikasi
-    bahwa semua hasil yang ditampilkan cocok dengan query.
-    
-    Args:
-        driver: WebDriver instance
-        wait: WebDriverWait instance
-        query_text: Teks yang akan dicari
-        
-    Raises:
-        AssertionError: Jika verifikasi hasil pencarian gagal.
-    """
-    print(f"\n{'='*60}")
-    print(f"🎯 Memulai Core Action: Pencarian user dengan query '{query_text}'")
-    print(f"{'='*60}")
-
-    # 1. Cari input search
-    try:
-        search_input = wait.until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "form input[name='query']"))
-        )
-    except TimeoutException:
-        raise RuntimeError("❌ Tidak menemukan input search (form input[name='query']).")
-
-    # 2. Ketik query dan tunggu sebentar
-    print(f"🔍 Mengetik query pencarian: '{query_text}'...")
-    search_input.clear()
-    search_input.send_keys(query_text)
-
-    # Tunggu sebentar agar AJAX/fetch data selesai (penting untuk pencarian)
-    time.sleep(2) 
-
-    # 3. Ambil baris tabel
-    rows = get_table_rows(driver, wait)
-    assert rows, f"❌ Tidak ada row ditemukan di tabel setelah pencarian dengan query '{query_text}'!"
-
-    # 4. Verifikasi setiap baris
-    matched_all = True
-    pattern = re.compile(rf"^{query_text}", re.IGNORECASE)
-    
-    print(f"🔎 Memverifikasi {len(rows)} hasil...")
-
-    for i, row in enumerate(rows, start=1):
-        cells = row.find_elements(By.TAG_NAME, "td")
-        if not cells: continue
-
-        # Asumsi kolom nama ada di kolom pertama (cells[0])
-        cell_text = cells[0].text.strip()
-        
-        if not pattern.match(cell_text):
-            matched_all = False
-            print(f"❌ Row {i} ('{cell_text}') TIDAK MATCH dengan query '{query_text}'")
-            # Tidak perlu break, kita kumpulkan semua kegagalan
-
-    # 5. Hasil Akhir
-    assert matched_all, "❌ Ada hasil pencarian yang tidak sesuai query!"
-    print(f"✅ Semua {len(rows)} hasil pencarian cocok dengan '{query_text}'.")
-    print(f"{'='*60}\n")
-    
-    # 6. (Optional) Cleanup: Clear input search jika diperlukan untuk test selanjutnya
-    # search_input.clear()
 
 
 def perform_toggle_status_and_verify(driver, wait, username):

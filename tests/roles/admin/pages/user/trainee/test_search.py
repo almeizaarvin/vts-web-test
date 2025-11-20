@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from tests.helper.edit_group_helper import *
+from tests.helper.general_helper import perform_search_and_verify
 
 @pytest.mark.usefixtures("login_as_admin_fixture")
 def test_search_user_trainee(login_as_admin_fixture):
