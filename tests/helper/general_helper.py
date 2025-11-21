@@ -105,3 +105,70 @@ def perform_search_and_verify(driver, wait, query_text):
     assert matched_all, "❌ Ada hasil pencarian yang tidak sesuai query!"
     print(f"✅ Semua {len(rows)} hasil pencarian MENGANDUNG kata kunci '{query_text}'.")
     print(f"{'='*60}\n")
+
+import re
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
+# Asumsi import helper lainnya sudah dilakukan di file ini
+
+def perform_search_and_verify(driver, wait, query_text):
+    """
+    Melakukan pencarian pada input field dan memverifikasi hasilnya.
+    """
+    print(f"\n{'='*60}")
+    print(f"🎯 Memulai Pencarian User dengan Query: '{query_text}'")
+    print(f"{'='*60}")
+
+    # 1. Cari input search
+    search_locator = (By.CSS_SELECTOR, "form input[name='query']")
+    try:
+        search_input = wait.until(EC.presence_of_element_located(search_locator))
+    except TimeoutException:
+        raise RuntimeError(f"❌ Tidak menemukan input search dengan locator: {search_locator}.")
+
+    # 2. Ketik query dan KIRIM (ENTER)
+    print(f"🔍 Mengetik query: '{query_text}' dan menekan ENTER...")
+    search_input.clear()
+    search_input.send_keys(query_text)
+    search_input.send_keys(Keys.ENTER)
+
+    time.sleep(2) 
+
+    # 3. Ambil baris tabel
+    try:
+        table = wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
+        rows = table.find_elements(By.CSS_SELECTOR, "tbody tr")
+        
+        assert rows, f"❌ Tidak ada hasil (row) ditemukan setelah pencarian dengan query '{query_text}'!"
+    except Exception as e:
+        raise AssertionError(f"Gagal mengambil/memverifikasi baris tabel: {e}")
+
+    # 4. Verifikasi setiap baris
+    matched_all = True
+    
+    # Kompilasi pola regex untuk pencarian substring (case insensitive)
+    pattern = re.compile(rf"{query_text}", re.IGNORECASE)
+    
+    print(f"🔎 Memverifikasi {len(rows)} hasil pencarian...")
+
+    for i, row in enumerate(rows, start=1):
+        cells = row.find_elements(By.TAG_NAME, "td")
+        if not cells: 
+            continue # Lewati jika row kosong (misal: row placeholder loading)
+
+        # Asumsi kolom nama/teks yang diverifikasi ada di kolom pertama (index 0)
+        cell_text = cells[0].text.strip() 
+        
+        # Menggunakan re.search() untuk mencari pola di mana pun dalam string
+        if not pattern.search(cell_text):
+            matched_all = False
+            print(f"❌ Row {i} ('{cell_text}') TIDAK mengandung query '{query_text}'")
+            # Tidak perlu break; lanjutkan untuk log semua kegagalan
+
+    # 5. Hasil Akhir
+    assert matched_all, f"❌ Ditemukan {len(rows) - sum(not matched_all for row in rows)} hasil yang tidak sesuai query!"
+    print(f"✅ Semua {len(rows)} hasil pencarian MENGANDUNG kata kunci '{query_text}'.")
+    print(f"{'='*60}\n")

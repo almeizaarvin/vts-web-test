@@ -1,6 +1,7 @@
 import pytest
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 from tests.helper.general_helper import navigate_to_page_button, perform_search_and_verify
 
 @pytest.mark.usefixtures("login_as_admin_fixture")

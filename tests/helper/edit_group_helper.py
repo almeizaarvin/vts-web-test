@@ -348,23 +348,40 @@ def open_group_edit_dropdown(driver, wait):
 
 def find_row_by_name(driver, wait, name):
     """
-    Mencari row berdasarkan nama di kolom manapun menggunakan XPath.
-    (Lebih disarankan jika nama yang dicari unik per row)
+    Mencari row berdasarkan nama, mendukung teks yang berada langsung di dalam TD
+    maupun di dalam elemen anak (seperti <p> atau <div>) di dalam TD.
     """
-    print(f"🔍 Mencari row dengan nama '{name}' menggunakan XPath...")
+    print(f"🔍 Mencari row dengan nama '{name}' menggunakan XPath yang robust...")
     
+    # PERUBAHAN UTAMA DI SINI:
+    # Menggunakan 'contains(., ...)' untuk mencari teks di dalam node saat ini (.) 
+    # dan semua keturunannya, termasuk elemen anak (P, DIV, dll.).
+    # Namun, karena kita ingin mencocokkan nama secara eksak (tidak hanya mengandung), 
+    # kita gabungkan dengan 'normalize-space()' pada seluruh node.
+    # Sayangnya, mencocokkan teks eksak dengan elemen anak seringkali sulit.
+    
+    # SOLUSI PALING STABIL (Mencari di dalam TD mana pun yang mengandung teks eksak):
     row_locator = (
         By.XPATH, 
-        f"//table//tbody/tr[.//td[normalize-space(text())='{name}']]"
+        # Mencari TR yang memiliki TD yang mengandung (contains) teks nama
+        # Catatan: Ini akan bekerja jika nama unik, namun bisa memuat 'Nama' yang merupakan 
+        # substring dari 'Nama Lain'. Jika nama unik, ini aman.
+        f"//table//tbody/tr[.//td[contains(normalize-space(.), '{name}')]]"
     )
     
+    # Alternatif jika nama harus benar-benar eksak (lebih ketat, tapi bisa rentan spasi)
+    # row_locator_strict = (
+    #    By.XPATH, 
+    #    f"//table//tbody/tr[.//td[normalize-space(.)='{name}']]"
+    # )
+    
     try:
+        # Menggunakan locator yang lebih fleksibel: contains(normalize-space(.), ...)
         row = wait.until(EC.presence_of_element_located(row_locator))
         print(f"✅ Row dengan teks '{name}' ditemukan.")
         return row
     except TimeoutException:
-        raise Exception(f"❌ Row dengan nama '{name}' tidak ditemukan!")
-    
+        raise Exception(f"❌ Row dengan nama '{name}' tidak ditemukan!")    
 
 def open_user_details_dialog(driver, wait, row):
     """
