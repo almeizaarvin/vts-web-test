@@ -106,13 +106,6 @@ def perform_search_and_verify(driver, wait, query_text):
     print(f"✅ Semua {len(rows)} hasil pencarian MENGANDUNG kata kunci '{query_text}'.")
     print(f"{'='*60}\n")
 
-import re
-import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.keys import Keys
-# Asumsi import helper lainnya sudah dilakukan di file ini
 
 def perform_search_and_verify(driver, wait, query_text):
     """
@@ -172,3 +165,42 @@ def perform_search_and_verify(driver, wait, query_text):
     assert matched_all, f"❌ Ditemukan {len(rows) - sum(not matched_all for row in rows)} hasil yang tidak sesuai query!"
     print(f"✅ Semua {len(rows)} hasil pencarian MENGANDUNG kata kunci '{query_text}'.")
     print(f"{'='*60}\n")
+
+
+def find_row_by_name(driver, wait, name):
+    """
+    Mencari row berdasarkan nama, mendukung teks yang berada langsung di dalam TD
+    maupun di dalam elemen anak (seperti <p> atau <div>) di dalam TD.
+    """
+    print(f"🔍 Mencari row dengan nama '{name}' menggunakan XPath yang robust...")
+    
+    # PERUBAHAN UTAMA DI SINI:
+    # Menggunakan 'contains(., ...)' untuk mencari teks di dalam node saat ini (.) 
+    # dan semua keturunannya, termasuk elemen anak (P, DIV, dll.).
+    # Namun, karena kita ingin mencocokkan nama secara eksak (tidak hanya mengandung), 
+    # kita gabungkan dengan 'normalize-space()' pada seluruh node.
+    # Sayangnya, mencocokkan teks eksak dengan elemen anak seringkali sulit.
+    
+    # SOLUSI PALING STABIL (Mencari di dalam TD mana pun yang mengandung teks eksak):
+    row_locator = (
+        By.XPATH, 
+        # Mencari TR yang memiliki TD yang mengandung (contains) teks nama
+        # Catatan: Ini akan bekerja jika nama unik, namun bisa memuat 'Nama' yang merupakan 
+        # substring dari 'Nama Lain'. Jika nama unik, ini aman.
+        f"//table//tbody/tr[.//td[contains(normalize-space(.), '{name}')]]"
+    )
+    
+    # Alternatif jika nama harus benar-benar eksak (lebih ketat, tapi bisa rentan spasi)
+    # row_locator_strict = (
+    #    By.XPATH, 
+    #    f"//table//tbody/tr[.//td[normalize-space(.)='{name}']]"
+    # )
+    
+    try:
+        # Menggunakan locator yang lebih fleksibel: contains(normalize-space(.), ...)
+        row = wait.until(EC.presence_of_element_located(row_locator))
+        print(f"✅ Row dengan teks '{name}' ditemukan.")
+        return row
+    except TimeoutException:
+        raise Exception(f"❌ Row dengan nama '{name}' tidak ditemukan!")    
+

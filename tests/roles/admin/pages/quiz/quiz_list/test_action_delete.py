@@ -2,7 +2,7 @@
 import pytest
 from selenium.webdriver.support.ui import WebDriverWait
 from tests.helper.general_helper import navigate_to_page_button
-from tests.helper.quiz_list_helper import perform_add_new_quiz_and_verify, perform_delete_quiz_and_verify
+from tests.helper.quiz_list_helper import delete_quiz_template_if_exists
 
 
 @pytest.mark.usefixtures("login_as_admin_fixture")
@@ -15,4 +15,4 @@ def test_delete_quiz(login_as_admin_fixture):
 
     navigate_to_page_button(driver, wait, "Quiz")
     
-    perform_delete_quiz_and_verify(driver, wait)
+    delete_quiz_template_if_exists(driver, wait, quiz_name="Template Kuis Baru")
