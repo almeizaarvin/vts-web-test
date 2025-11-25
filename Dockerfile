@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Install dependencies untuk Chrome dan Selenium
-RUN apt-get update && apt-get install -y wget gnupg unzip curl
+RUN apt-get update && apt-get install -y wget gnupg unzip curl && apt-get install -y make
 
 # Tambahkan kunci repository Chrome
 RUN wget -q -O /usr/share/keyrings/google-linux-signing-keyring.gpg https://dl.google.com/linux/linux_signing_key.pub \
