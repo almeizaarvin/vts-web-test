@@ -66,6 +66,10 @@ test-quiz-add:
 	@echo "📄 Running test_create_new_add.py..."
 	pytest $(QUIZ_LIST_DIR)/test_create_new_add.py $(REPORT_OPTS)
 
+test-quiz-add-delete:
+	@echo "📄 Running test_create_new_add.py..."
+	pytest $(QUIZ_LIST_DIR)/test_create_new_delete.py $(REPORT_OPTS)
+
 test-quiz-del:
 	@echo "📄 Running test_action_delete.py..."
 	pytest $(QUIZ_LIST_DIR)/test_action_delete.py $(REPORT_OPTS)
@@ -109,3 +113,16 @@ test-score-edit:
 test-smoke:
 	@echo "💨 Running Smoke Tests (using marker -m smoke)..."
 	pytest -m smoke $(REPORT_OPTS)
+
+LESSON_DIR := $(ADMIN_ROOT)/lessons
+
+test-lesson-delete:
+	@echo "📄 Running lesson delete test..."
+	pytest $(LESSON_DIR)/test_file_action_delete.py $(REPORT_OPTS)
+
+
+ASSIGNMENTS_DIR := $(ADMIN_ROOT)/assignments
+
+test-assignments:
+	@echo "📄 Running lesson delete test..."
+	pytest $(ASSIGNMENTS_DIR)/test_new_course.py $(REPORT_OPTS)

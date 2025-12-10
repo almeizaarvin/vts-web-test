@@ -160,6 +160,84 @@ def perform_add_new_quiz_and_verify(driver, wait):
     
     return quiz_name
 
+
+def perform_add_new_quiz_and_delete_question(driver, wait):
+    """
+    Membuat kuis baru → Add Question → Save → Delete question terakhir (Native Click) → Verify toast success.
+    """
+
+    print("\n" + "="*60)
+    print("🎯 Memulai: Add New Quiz dan Delete Question (Native Only)")
+    print("="*60)
+
+    # 1. Klik tombol Create New Quiz
+    click_create_new_quiz(driver, wait)
+
+    # 2. Klik tombol Add Question
+    print("➕ Mengklik tombol Add Question...")
+    add_question_locator = (By.XPATH, "//button[contains(., 'Add')]")
+    add_question_btn = wait.until(EC.element_to_be_clickable(add_question_locator))
+    safe_click(driver, add_question_btn)
+    print("✅ Tombol Add Question diklik.")
+
+    # 3. KLIK TOMBOL SAVE (Menggunakan locator yang paling stabil untuk dialog actions)
+    print("💾 Mengklik tombol 'Save' dan menunggu modal menghilang...")
+
+    # Locator Modal/Dialog untuk Wait Invisibility
+    modal_locator = (By.XPATH, "//div[@role='dialog' and @aria-modal='true']")
+    
+    # Locator Tombol Save (berdasarkan posisi button[2] atau teks)
+    save_btn_locator = (By.XPATH, "//div[contains(@class, 'MuiDialogActions-root')]/button[2]")
+    
+    # Wait dan Klik Save
+    save_btn = wait.until(EC.element_to_be_clickable(save_btn_locator))
+    safe_click(driver, save_btn)
+    print("✅ Tombol Save diklik.")
+
+    # WAJIB: Tunggu MODAL menghilang (Karena klik Save seharusnya menutup modal)
+    wait.until(EC.invisibility_of_element_located(modal_locator))
+    print("✅ Modal Add Question berhasil ditutup.")
+    time.sleep(1) # Tunggu sebentar untuk transisi DOM
+
+    # 4. Cari row terakhir pada tabel (tr terakhir)
+    print("🔍 Mencari row tabel terakhir...")
+    table_row_locator = (By.XPATH, "//table//tbody/tr")
+    rows = wait.until(EC.presence_of_all_elements_located(table_row_locator))
+
+    if not rows:
+        raise RuntimeError("❌ Tidak ada row pada tabel — tidak bisa delete.")
+
+    last_row = rows[-1]
+    print("✅ Row terakhir ditemukan.")
+
+    # 5. KLIK TOMBOL DELETE (Hanya Native Click)
+    print("🗑️ Mencari tombol Delete (Ikon) pada row terakhir...")
+    
+    # LOCATOR NATIVE UNTUK TOMBOL IKON: Target BUTTON yang berisi SVG DeleteIcon
+    # Ini adalah locator paling tepat berdasarkan struktur HTML yang kamu berikan.
+    delete_btn_locator_relative = (
+        By.XPATH,
+            ".//button[contains(text(),'Delete')]"
+    )
+    
+    # Cari elemen BUTTON di dalam scope last_row
+    delete_btn = last_row.find_element(*delete_btn_locator_relative)
+    
+    # Tunggu hingga tombol benar-benar clickable (Meskipun sudah ditemukan)
+    wait.until(EC.element_to_be_clickable(delete_btn))
+    
+    safe_click(driver, delete_btn)
+    print("📝 Tombol Delete diklik secara Native.")
+        
+    # 6. Tunggu toast success
+    print("🔎 Menunggu Toast Success...")
+    wait_for_toast(wait)
+    print("✅ Toast Success muncul — Question berhasil dihapus.")
+
+    print("="*60 + "\n")
+
+    return True
+
 def perform_quiz_row_action(driver, wait, quiz_name, action_label, verification_type="navigate"):
     """
     Fungsi modular untuk melakukan aksi (Delete, Submission, Preview) pada row kuis.
