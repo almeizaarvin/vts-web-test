@@ -128,6 +128,10 @@ test-lesson-delete:
 
 ASSIGNMENTS_DIR := $(ADMIN_ROOT)/assignments
 
-test-assignments:
-	@echo "📄 Running lesson delete test..."
-	pytest $(ASSIGNMENTS_DIR)/test_new_course.py $(REPORT_OPTS)
+test-add-assignment:
+	@echo "📄 Running add course..."
+	pytest $(ASSIGNMENTS_DIR)/test_add_course.py $(REPORT_OPTS)
+	
+test-delete-assignment:
+	@echo "📄 Running delete course..."
+	pytest $(ASSIGNMENTS_DIR)/test_delete_course.py $(REPORT_OPTS)
