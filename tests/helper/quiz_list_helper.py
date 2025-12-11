@@ -163,30 +163,69 @@ def perform_add_new_quiz_and_verify(driver, wait):
 
 def perform_add_new_quiz_and_delete_question(driver, wait):
     """
-    Membuat kuis baru → Add Question → Save → Delete question terakhir (Native Click) → Verify toast success.
+    Membuat kuis baru → LANGSUNG Edit pertanyaan default (Native Click) → Save → Verify toast success.
     """
 
     print("\n" + "="*60)
-    print("🎯 Memulai: Add New Quiz dan Delete Question (Native Only)")
+    print("🎯 Memulai: Edit Pertanyaan Default (Native Only)")
     print("="*60)
 
-    # 1. Klik tombol Create New Quiz
-    click_create_new_quiz(driver, wait)
-
-    # 2. Klik tombol Add Question
-    print("➕ Mengklik tombol Add Question...")
-    add_question_locator = (By.XPATH, "//button[contains(., 'Add')]")
-    add_question_btn = wait.until(EC.element_to_be_clickable(add_question_locator))
-    safe_click(driver, add_question_btn)
-    print("✅ Tombol Add Question diklik.")
-
-    # 3. KLIK TOMBOL SAVE (Menggunakan locator yang paling stabil untuk dialog actions)
-    print("💾 Mengklik tombol 'Save' dan menunggu modal menghilang...")
-
-    # Locator Modal/Dialog untuk Wait Invisibility
-    modal_locator = (By.XPATH, "//div[@role='dialog' and @aria-modal='true']")
+    # 1. Klik tombol Create New Quiz (Ini akan membuka quiz detail dan menampilkan tabel dengan 1 pertanyaan default)
+    print("➡️ Membuat/Membuka Quiz Baru untuk mencapai tabel pertanyaan...")
+    try:
+        click_create_new_quiz(driver, wait)
+        print("✅ Berada di halaman detail quiz.")
+    except Exception as e:
+        print(f"❌ Gagal membuat/membuka quiz baru: {e}")
+        return False
     
-    # Locator Tombol Save (berdasarkan posisi button[2] atau teks)
+    time.sleep(1) # Tunggu sebentar untuk loading konten tabel
+
+    # 2. Cari row terakhir pada tabel (yang merupakan pertanyaan default)
+    print("🔍 Mencari row tabel (pertanyaan default/terakhir)...")
+    table_row_locator = (By.XPATH, "//table//tbody/tr")
+    
+    # Tunggu setidaknya satu baris muncul
+    try:
+        rows = wait.until(EC.presence_of_all_elements_located(table_row_locator))
+    except TimeoutException:
+        raise RuntimeError("❌ Tabel pertanyaan tidak ditemukan atau pertanyaan default tidak muncul.")
+
+    if not rows:
+        raise RuntimeError("❌ Tidak ada row pada tabel. Pertanyaan default tidak ditemukan.")
+
+    # Ambil row pertama (atau terakhir, jika kamu yakin pertanyaan default selalu dihitung sebagai baris pertama/terakhir)
+    # Kita ambil yang pertama/default, yaitu rows[0]
+    default_row = rows[0]
+    print(f"✅ Row default ditemukan. Total {len(rows)} pertanyaan.")
+
+    # 3. KLIK TOMBOL EDIT (Hanya Native Click)
+    print("✏️ Mencari tombol Edit (Ikon) pada row default...")
+    
+    # LOCATOR NATIVE UNTUK TOMBOL IKON EDIT: Target BUTTON yang berisi SVG EditIcon
+    edit_btn_locator_relative = (
+        By.XPATH,
+        ".//button[.//svg[@data-testid='EditIcon'] or .//svg[@data-testid='ModeEditIcon']]"
+    )
+    
+    # Cari elemen BUTTON di dalam scope default_row
+    edit_btn = default_row.find_element(*edit_btn_locator_relative)
+    
+    # Tunggu hingga tombol benar-benar clickable
+    wait.until(EC.element_to_be_clickable(edit_btn))
+    
+    safe_click(driver, edit_btn)
+    print("📝 Tombol Edit diklik secara Native. Menunggu Modal Edit muncul...")
+    
+    # 4. Tunggu modal/dialog Edit muncul
+    modal_locator = (By.XPATH, "//div[@role='dialog' and @aria-modal='true']")
+    wait.until(EC.visibility_of_element_located(modal_locator))
+    print("✅ Modal Edit Question berhasil muncul.")
+    
+    # 5. KLIK TOMBOL SAVE (Tanpa mengubah input apapun, hanya menyimpan ulang)
+    print("💾 Mengklik tombol 'Save' di modal Edit...")
+
+    # Locator Tombol Save (berdasarkan posisi button[2] di DialogActions)
     save_btn_locator = (By.XPATH, "//div[contains(@class, 'MuiDialogActions-root')]/button[2]")
     
     # Wait dan Klik Save
@@ -194,49 +233,133 @@ def perform_add_new_quiz_and_delete_question(driver, wait):
     safe_click(driver, save_btn)
     print("✅ Tombol Save diklik.")
 
-    # WAJIB: Tunggu MODAL menghilang (Karena klik Save seharusnya menutup modal)
+    # 6. WAJIB: Tunggu MODAL menghilang 
     wait.until(EC.invisibility_of_element_located(modal_locator))
-    print("✅ Modal Add Question berhasil ditutup.")
+    print("✅ Modal Edit Question berhasil ditutup.")
     time.sleep(1) # Tunggu sebentar untuk transisi DOM
 
-    # 4. Cari row terakhir pada tabel (tr terakhir)
-    print("🔍 Mencari row tabel terakhir...")
-    table_row_locator = (By.XPATH, "//table//tbody/tr")
-    rows = wait.until(EC.presence_of_all_elements_located(table_row_locator))
-
-    if not rows:
-        raise RuntimeError("❌ Tidak ada row pada tabel — tidak bisa delete.")
-
-    last_row = rows[-1]
-    print("✅ Row terakhir ditemukan.")
-
-    # 5. KLIK TOMBOL DELETE (Hanya Native Click)
-    print("🗑️ Mencari tombol Delete (Ikon) pada row terakhir...")
-    
-    # LOCATOR NATIVE UNTUK TOMBOL IKON: Target BUTTON yang berisi SVG DeleteIcon
-    # Ini adalah locator paling tepat berdasarkan struktur HTML yang kamu berikan.
-    delete_btn_locator_relative = (
-        By.XPATH,
-            ".//button[contains(text(),'Delete')]"
-    )
-    
-    # Cari elemen BUTTON di dalam scope last_row
-    delete_btn = last_row.find_element(*delete_btn_locator_relative)
-    
-    # Tunggu hingga tombol benar-benar clickable (Meskipun sudah ditemukan)
-    wait.until(EC.element_to_be_clickable(delete_btn))
-    
-    safe_click(driver, delete_btn)
-    print("📝 Tombol Delete diklik secara Native.")
-        
-    # 6. Tunggu toast success
+    # 7. Tunggu toast success
     print("🔎 Menunggu Toast Success...")
     wait_for_toast(wait)
-    print("✅ Toast Success muncul — Question berhasil dihapus.")
+    print("✅ Toast Success muncul — Pertanyaan default berhasil diedit/disimpan ulang.")
 
     print("="*60 + "\n")
 
     return True
+
+def perform_add_new_quiz_and_edit_question(driver, wait):
+    """
+    Membuat quiz baru → Edit pertanyaan default → Save → Verifikasi teks di tabel.
+    Hanya menggunakan native click (safe_click).
+    """
+
+    print("\n" + "="*60)
+    print("🎯 Memulai: Edit Pertanyaan Default (Native Only)")
+    print("="*60)
+
+    NEW_QUESTION_TEXT = " Edited"
+
+    # ============================================================
+    # 1. Buat New Quiz / Masuk ke Detail Quiz
+    # ============================================================
+    print("➡️ Membuat/Membuka quiz baru...")
+
+    try:
+        click_create_new_quiz(driver, wait)
+        print("✅ Berada di halaman detail quiz.")
+    except Exception as e:
+        print(f"❌ Gagal membuat/membuka quiz baru: {e}")
+        return False
+
+    time.sleep(1)
+
+    # ============================================================
+    # 2. Ambil row pertama (default question)
+    # ============================================================
+    print("🔍 Mencari pertanyaan default di tabel...")
+
+    try:
+        rows = wait.until(
+            EC.presence_of_all_elements_located((By.XPATH, "//table//tbody/tr"))
+        )
+    except TimeoutException:
+        raise RuntimeError("❌ Tabel pertanyaan tidak ditemukan.")
+
+    if not rows:
+        raise RuntimeError("❌ Tidak ada pertanyaan default di tabel.")
+
+    default_row = rows[0]
+    print(f"✅ Pertanyaan default ditemukan. Total pertanyaan: {len(rows)}")
+
+    # ============================================================
+    # 3. Klik tombol Edit di row pertama
+    # ============================================================
+    print("✏️ Klik tombol Edit pada row default...")
+
+    edit_btn = default_row.find_element(By.XPATH, ".//button[contains(text(),'Edit')]")
+    wait.until(EC.element_to_be_clickable(edit_btn))
+    safe_click(driver, edit_btn)
+
+    print("📝 Menunggu modal Edit muncul...")
+
+    # ============================================================
+    # 4. Isi Textarea Pertanyaan
+    # ============================================================
+    wait.until(
+        EC.visibility_of_element_located(
+            (By.XPATH, "//div[@role='dialog' and @aria-modal='true']")
+        )
+    )
+    print("✅ Modal Edit terbuka.")
+
+    print("📝 Mengedit pertanyaan...")
+
+    textarea = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, "//textarea[contains(text(),'Pertanyaan')]")
+        )
+    )
+
+    textarea.clear()
+    textarea.send_keys(NEW_QUESTION_TEXT)
+
+    print(f"✅ Teks pertanyaan diubah menjadi: 'Pertanyaan {NEW_QUESTION_TEXT}'")
+
+    # ============================================================
+    # 5. Klik tombol Save
+    # ============================================================
+    print("💾 Klik tombol Save di modal...")
+
+    save_btn = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, "//div[contains(@class, 'MuiDialogActions-root')]/button[2]")
+        )
+    )
+    safe_click(driver, save_btn)
+
+    print("✅ Perubahan disimpan.")
+
+    # ============================================================
+    # 6. Verifikasi hasil di tabel
+    # ============================================================
+    print("🔍 Verifikasi apakah teks edit muncul di tabel...")
+
+    try:
+        wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//table//td[contains(., 'Pertanyaan Edited')]")
+            )
+        )
+        print("✅ Verifikasi BERHASIL.")
+        return True
+
+    except TimeoutException:
+        print("❌ Verifikasi GAGAL: Teks tidak muncul di tabel setelah Save.")
+        return False
+
+    finally:
+        print("="*60 + "\n")
+
 
 def perform_quiz_row_action(driver, wait, quiz_name, action_label, verification_type="navigate"):
     """

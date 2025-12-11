@@ -70,6 +70,11 @@ test-quiz-add-delete:
 	@echo "📄 Running test_create_new_add.py..."
 	pytest $(QUIZ_LIST_DIR)/test_create_new_delete.py $(REPORT_OPTS)
 
+test-quiz-add-edit:
+	@echo "📄 Running test_create_new_add.py..."
+	pytest $(QUIZ_LIST_DIR)/test_create_new_edit.py $(REPORT_OPTS)
+
+
 test-quiz-del:
 	@echo "📄 Running test_action_delete.py..."
 	pytest $(QUIZ_LIST_DIR)/test_action_delete.py $(REPORT_OPTS)
