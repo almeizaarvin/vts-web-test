@@ -20,4 +20,4 @@ services:
       - .:/app
     env_file:
       - .env
-    entrypoint: ["pytest", "--disable-warnings", "-q"]
+    entrypoint: ["sleep", "infinity"]
