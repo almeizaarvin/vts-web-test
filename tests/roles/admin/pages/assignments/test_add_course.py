@@ -18,7 +18,7 @@ def test_add_new_course(login_as_admin_fixture):
     TEST_COURSE_NAME = "Course Testing"
     
     # Panggil fungsi helper untuk melakukan seluruh skenario Add Course
-    result = perform_delete_course(driver, wait, course_name=TEST_COURSE_NAME)
+    result = add_course_to_assignment(driver, wait, course_name=TEST_COURSE_NAME)
 
     # Verifikasi hasil: memastikan helper function mengembalikan True
     assert result is True, f"Failed to add course"
