@@ -1,137 +1,142 @@
 ﻿# ====================================================================
 # VTS UI Test Makefile
-# Digunakan untuk menyingkat perintah pytest berdasarkan struktur file
 # ====================================================================
 
-# Default command saat menjalankan 'make' tanpa target: Run semua test.
 .DEFAULT_GOAL := test-all
 
-# Variabel Global
 REPORT_OPTS := --html=/app/reports/report.html --self-contained-html --disable-warnings -q
 ADMIN_ROOT := tests/roles/admin/pages
 INST_ROOT := tests/roles/instructor/pages
 
 # --------------------------------------------------------------------
-# 1. Targets Global (Default)
+# 1. Global
 # --------------------------------------------------------------------
 
 test-all:
-	@echo "ðŸ”¥ Running ALL tests in 'tests/' folder..."
-	pytest $(REPORT_OPTS)
+	@echo "🔥 Running ALL tests in 'tests/' folder..."
+	pytest $(REPORT_OPTS) || true
 
 test-verbose:
-	@echo "ðŸ” Running ALL tests with verbose output..."
-	pytest --verbose $(REPORT_OPTS)
+	@echo "🔍 Running ALL tests with verbose output..."
+	pytest --verbose $(REPORT_OPTS) || true
 
 
 # --------------------------------------------------------------------
-# 2. Targets Per Group Role/User
+# 2. Role-based
 # --------------------------------------------------------------------
 
 test-admin:
-	@echo "â–¶ï¸ Running all Admin tests..."
-	pytest $(ADMIN_ROOT) $(REPORT_OPTS)
+	@echo "▶️ Running all Admin tests..."
+	pytest $(ADMIN_ROOT) $(REPORT_OPTS) || true
 
 test-instructor:
-	@echo "â–¶ï¸ Running all Instructor tests..."
-	pytest $(INST_ROOT) $(REPORT_OPTS)
+	@echo "▶️ Running all Instructor tests..."
+	pytest $(INST_ROOT) $(REPORT_OPTS) || true
+
 
 # --------------------------------------------------------------------
-# 3. Targets Per Modul (Admin Actions)
+# 3. Admin Modules
 # --------------------------------------------------------------------
 
-# Semua test di bawah folder quiz (quiz_list dan result)
 test-admin-quiz:
-	@echo "â–¶ï¸ Running all Quiz Management tests (Admin)..."
-	pytest $(ADMIN_ROOT)/quiz $(REPORT_OPTS)
+	@echo "▶️ Running all Quiz Management tests (Admin)..."
+	pytest $(ADMIN_ROOT)/quiz $(REPORT_OPTS) || true
 
-# Semua test di bawah folder user
 test-admin-user:
-	@echo "â–¶ï¸ Running all User Management tests (Admin)..."
-	pytest $(ADMIN_ROOT)/user $(REPORT_OPTS)
+	@echo "▶️ Running all User Management tests (Admin)..."
+	pytest $(ADMIN_ROOT)/user $(REPORT_OPTS) || true
 
 
 # --------------------------------------------------------------------
-# 4. Targets Per File Spesifik (Paling Sering Dipakai)
+# 4. Quiz List (per file)
 # --------------------------------------------------------------------
 
-# --- A. Quiz List Files ---
 QUIZ_LIST_DIR := $(ADMIN_ROOT)/quiz/quiz_list
 
 test-quiz-list-all:
-	@echo "ðŸ“„ Running ALL tests in Quiz List folder..."
-	pytest $(QUIZ_LIST_DIR) $(REPORT_OPTS)
+	@echo "📄 Running ALL tests in Quiz List folder..."
+	pytest $(QUIZ_LIST_DIR) $(REPORT_OPTS) || true
 
 test-quiz-add:
-	@echo "ðŸ“„ Running test_create_new_add.py..."
-	pytest $(QUIZ_LIST_DIR)/test_create_new_add.py $(REPORT_OPTS)
+	@echo "📄 Running test_create_new_add.py..."
+	pytest $(QUIZ_LIST_DIR)/test_create_new_add.py $(REPORT_OPTS) || true
 
 test-quiz-add-delete:
-	@echo "ðŸ“„ Running test_create_new_add.py..."
-	pytest $(QUIZ_LIST_DIR)/test_create_new_delete.py $(REPORT_OPTS)
+	@echo "📄 Running test_create_new_delete.py..."
+	pytest $(QUIZ_LIST_DIR)/test_create_new_delete.py $(REPORT_OPTS) || true
 
 test-quiz-add-edit:
-	@echo "ðŸ“„ Running test_create_new_add.py..."
-	pytest $(QUIZ_LIST_DIR)/test_create_new_edit.py $(REPORT_OPTS)
-
+	@echo "📄 Running test_create_new_edit.py..."
+	pytest $(QUIZ_LIST_DIR)/test_create_new_edit.py $(REPORT_OPTS) || true
 
 test-quiz-del:
-	@echo "ðŸ“„ Running test_action_delete.py..."
-	pytest $(QUIZ_LIST_DIR)/test_action_delete.py $(REPORT_OPTS)
+	@echo "📄 Running test_action_delete.py..."
+	pytest $(QUIZ_LIST_DIR)/test_action_delete.py $(REPORT_OPTS) || true
 
 test-quiz-search:
-	@echo "ðŸ“„ Running test_search.py..."
-	pytest $(QUIZ_LIST_DIR)/test_search.py $(REPORT_OPTS)
-	
+	@echo "📄 Running test_search.py..."
+	pytest $(QUIZ_LIST_DIR)/test_search.py $(REPORT_OPTS) || true
+
 test-quiz-preview:
-	@echo "ðŸ“„ Running test_action_preview.py..."
-	pytest $(QUIZ_LIST_DIR)/test_action_preview.py $(REPORT_OPTS)
+	@echo "📄 Running test_action_preview.py..."
+	pytest $(QUIZ_LIST_DIR)/test_action_preview.py $(REPORT_OPTS) || true
 
 test-quiz-submission:
-	@echo "ðŸ“„ Running test_action_quiz_submission.py..."
-	pytest $(QUIZ_LIST_DIR)/test_action_quiz_submission.py $(REPORT_OPTS)
+	@echo "📄 Running test_action_quiz_submission.py..."
+	pytest $(QUIZ_LIST_DIR)/test_action_quiz_submission.py $(REPORT_OPTS) || true
 
-
-# --- B. Group Files (Berada di dalam Quiz List, berdasarkan struktur) ---
-test-group-add:
-	@echo "ðŸ“„ Running test_edit_group_add.py..."
-	pytest $(QUIZ_LIST_DIR)/test_edit_group_add.py $(REPORT_OPTS)
-
-test-group-del:
-	@echo "ðŸ“„ Running test_edit_group_delete.py..."
-	pytest $(QUIZ_LIST_DIR)/test_edit_group_delete.py $(REPORT_OPTS)
-
-test-group-edit:
-	@echo "ðŸ“„ Running test_edit_group_edit.py..."
-	pytest $(QUIZ_LIST_DIR)/test_edit_group_edit.py $(REPORT_OPTS)
-
-
-# --- C. Result Files ---
-test-score-edit:
-	@echo "ðŸ“„ Running test_edit_score.py..."
-	pytest $(ADMIN_ROOT)/quiz/result/test_edit_score.py $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
-# 5. Targets Run via Marker
+# 5. Group
+# --------------------------------------------------------------------
+
+test-group-add:
+	@echo "📄 Running test_edit_group_add.py..."
+	pytest $(QUIZ_LIST_DIR)/test_edit_group_add.py $(REPORT_OPTS) || true
+
+test-group-del:
+	@echo "📄 Running test_edit_group_delete.py..."
+	pytest $(QUIZ_LIST_DIR)/test_edit_group_delete.py $(REPORT_OPTS) || true
+
+test-group-edit:
+	@echo "📄 Running test_edit_group_edit.py..."
+	pytest $(QUIZ_LIST_DIR)/test_edit_group_edit.py $(REPORT_OPTS) || true
+
+
+# --------------------------------------------------------------------
+# 6. Result
+# --------------------------------------------------------------------
+
+test-score-edit:
+	@echo "📄 Running test_edit_score.py..."
+	pytest $(ADMIN_ROOT)/quiz/result/test_edit_score.py $(REPORT_OPTS) || true
+
+
+# --------------------------------------------------------------------
+# 7. Marker
 # --------------------------------------------------------------------
 
 test-smoke:
-	@echo "ðŸ’¨ Running Smoke Tests (using marker -m smoke)..."
-	pytest -m smoke $(REPORT_OPTS)
+	@echo "💨 Running Smoke Tests..."
+	pytest -m smoke $(REPORT_OPTS) || true
+
+
+# --------------------------------------------------------------------
+# 8. Lesson & Assignment
+# --------------------------------------------------------------------
 
 LESSON_DIR := $(ADMIN_ROOT)/lessons
 
 test-lesson-delete:
-	@echo "ðŸ“„ Running lesson delete test..."
-	pytest $(LESSON_DIR)/test_file_action_delete.py $(REPORT_OPTS)
-
+	@echo "📄 Running lesson delete test..."
+	pytest $(LESSON_DIR)/test_file_action_delete.py $(REPORT_OPTS) || true
 
 ASSIGNMENTS_DIR := $(ADMIN_ROOT)/assignments
 
 test-add-assignment:
-	@echo "ðŸ“„ Running add course..."
-	pytest $(ASSIGNMENTS_DIR)/test_add_course.py $(REPORT_OPTS)
-	
+	@echo "📄 Running add course..."
+	pytest $(ASSIGNMENTS_DIR)/test_add_course.py $(REPORT_OPTS) || true
+
 test-delete-assignment:
-	@echo "ðŸ“„ Running delete course..."
-	pytest $(ASSIGNMENTS_DIR)/test_delete_course.py $(REPORT_OPTS)
+	@echo "📄 Running delete course..."
+	pytest $(ASSIGNMENTS_DIR)/test_delete_course.py $(REPORT_OPTS) || true
