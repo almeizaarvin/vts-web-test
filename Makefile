@@ -7,7 +7,7 @@
 .DEFAULT_GOAL := test-all
 
 # Variabel Global
-REPORT_OPTS := --html=reports/report.html --self-contained-html --disable-warnings -q
+REPORT_OPTS := --html=/app/reports/report.html --self-contained-html --disable-warnings -q
 ADMIN_ROOT := tests/roles/admin/pages
 INST_ROOT := tests/roles/instructor/pages
 
