@@ -1,5 +1,6 @@
 import os
 import pytest
+import pytest_html
 import base64
 from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
