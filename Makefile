@@ -1,27 +1,15 @@
 ﻿# ====================================================================
-# VTS UI Test Makefile (FINAL)
-# HTML report FIXED for Jenkins & Docker
+# VTS UI Test Makefile (Docker Agent Friendly)
 # ====================================================================
 
 .DEFAULT_GOAL := test-all
 
-# --------------------------------------------------------------------
-# Global config
-# --------------------------------------------------------------------
-
-# PENTING:
-# - path RELATIVE
-# - pytest nulis ke ./reports/report.html
+# REPORT: RELATIVE ke workspace Jenkins
 REPORT_OPTS := --html=reports/report.html --self-contained-html --disable-warnings -q
 
 ADMIN_ROOT := tests/roles/admin/pages
-INST_ROOT  := tests/roles/instructor/pages
-
-# Helper
-define RUN_PYTEST
-	mkdir -p reports
-	pytest $(1) $(REPORT_OPTS) || true
-endef
+INST_ROOT := tests/roles/instructor/pages
+QUIZ_LIST_DIR := $(ADMIN_ROOT)/quiz/quiz_list
 
 # --------------------------------------------------------------------
 # 1. Global
@@ -29,123 +17,106 @@ endef
 
 test-all:
 	@echo "🔥 Running ALL tests..."
-	$(call RUN_PYTEST,)
+	mkdir -p reports
+	pytest $(REPORT_OPTS)
 
 test-verbose:
 	@echo "🔍 Running ALL tests (verbose)..."
 	mkdir -p reports
-	pytest --verbose $(REPORT_OPTS) || true
+	pytest --verbose $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
 # 2. Role-based
 # --------------------------------------------------------------------
 
 test-admin:
-	@echo "▶️ Running all Admin tests..."
-	$(call RUN_PYTEST,$(ADMIN_ROOT))
+	@echo "▶️ Admin tests..."
+	mkdir -p reports
+	pytest $(ADMIN_ROOT) $(REPORT_OPTS)
 
 test-instructor:
-	@echo "▶️ Running all Instructor tests..."
-	$(call RUN_PYTEST,$(INST_ROOT))
+	@echo "▶️ Instructor tests..."
+	mkdir -p reports
+	pytest $(INST_ROOT) $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
 # 3. Admin Modules
 # --------------------------------------------------------------------
 
 test-admin-quiz:
-	@echo "▶️ Running all Quiz Management tests (Admin)..."
-	$(call RUN_PYTEST,$(ADMIN_ROOT)/quiz)
+	@echo "▶️ Admin Quiz tests..."
+	mkdir -p reports
+	pytest $(ADMIN_ROOT)/quiz $(REPORT_OPTS)
 
 test-admin-user:
-	@echo "▶️ Running all User Management tests (Admin)..."
-	$(call RUN_PYTEST,$(ADMIN_ROOT)/user)
+	@echo "▶️ Admin User tests..."
+	mkdir -p reports
+	pytest $(ADMIN_ROOT)/user $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
-# 4. Quiz List (per file)
+# 4. Quiz List
 # --------------------------------------------------------------------
-
-QUIZ_LIST_DIR := $(ADMIN_ROOT)/quiz/quiz_list
 
 test-quiz-list-all:
-	@echo "📄 Running ALL Quiz List tests..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR))
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR) $(REPORT_OPTS)
 
 test-quiz-add:
-	@echo "📄 Running test_create_new_add.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_create_new_add.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_create_new_add.py $(REPORT_OPTS)
 
 test-quiz-add-delete:
-	@echo "📄 Running test_create_new_delete.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_create_new_delete.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_create_new_delete.py $(REPORT_OPTS)
 
 test-quiz-add-edit:
-	@echo "📄 Running test_create_new_edit.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_create_new_edit.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_create_new_edit.py $(REPORT_OPTS)
 
 test-quiz-del:
-	@echo "📄 Running test_action_delete.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_action_delete.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_action_delete.py $(REPORT_OPTS)
 
 test-quiz-search:
-	@echo "📄 Running test_search.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_search.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_search.py $(REPORT_OPTS)
 
 test-quiz-preview:
-	@echo "📄 Running test_action_preview.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_action_preview.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_action_preview.py $(REPORT_OPTS)
 
 test-quiz-submission:
-	@echo "📄 Running test_action_quiz_submission.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_action_quiz_submission.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_action_quiz_submission.py $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
 # 5. Group
 # --------------------------------------------------------------------
 
 test-group-add:
-	@echo "📄 Running test_edit_group_add.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_edit_group_add.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_edit_group_add.py $(REPORT_OPTS)
 
 test-group-del:
-	@echo "📄 Running test_edit_group_delete.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_edit_group_delete.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_edit_group_delete.py $(REPORT_OPTS)
 
 test-group-edit:
-	@echo "📄 Running test_edit_group_edit.py..."
-	$(call RUN_PYTEST,$(QUIZ_LIST_DIR)/test_edit_group_edit.py)
+	mkdir -p reports
+	pytest $(QUIZ_LIST_DIR)/test_edit_group_edit.py $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
 # 6. Result
 # --------------------------------------------------------------------
 
 test-score-edit:
-	@echo "📄 Running test_edit_score.py..."
-	$(call RUN_PYTEST,$(ADMIN_ROOT)/quiz/result/test_edit_score.py)
+	mkdir -p reports
+	pytest $(ADMIN_ROOT)/quiz/result/test_edit_score.py $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
 # 7. Marker
 # --------------------------------------------------------------------
 
 test-smoke:
-	@echo "💨 Running Smoke Tests..."
 	mkdir -p reports
-	pytest -m smoke $(REPORT_OPTS) || true
-
-# --------------------------------------------------------------------
-# 8. Lesson & Assignment
-# --------------------------------------------------------------------
-
-LESSON_DIR := $(ADMIN_ROOT)/lessons
-ASSIGNMENTS_DIR := $(ADMIN_ROOT)/assignments
-
-test-lesson-delete:
-	@echo "📄 Running lesson delete test..."
-	$(call RUN_PYTEST,$(LESSON_DIR)/test_file_action_delete.py)
-
-test-add-assignment:
-	@echo "📄 Running add course..."
-	$(call RUN_PYTEST,$(ASSIGNMENTS_DIR)/test_add_course.py)
-
-test-delete-assignment:
-	@echo "📄 Running delete course..."
-	$(call RUN_PYTEST,$(ASSIGNMENTS_DIR)/test_delete_course.py)
+	pytest -m smoke $(REPORT_OPTS)
