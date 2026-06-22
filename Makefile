@@ -1,19 +1,27 @@
 ﻿# ====================================================================
-# VTS UI Test Makefile (Docker Agent Friendly)
+# VTS UI Test Makefile (Clean Separation: Admin vs Instructor)
 # ====================================================================
 
 .DEFAULT_GOAL := test-all
 
 REPORT_OPTS := --html=reports/report.html --self-contained-html --disable-warnings -q
 
+# ROOTS
 ADMIN_ROOT := tests/roles/admin/pages
-INST_ROOT := tests/roles/instructor/pages
-QUIZ_LIST_DIR := $(ADMIN_ROOT)/quiz/quiz_list
-ASSIGNMENT_DIR := $(ADMIN_ROOT)/assignments
+INSTRUCTOR_ROOT := tests/roles/instructor/pages
 
-# --------------------------------------------------------------------
-# 1. Global
-# --------------------------------------------------------------------
+# MODULES (ADMIN)
+ADMIN_ASSIGNMENT := $(ADMIN_ROOT)/assignments
+ADMIN_LESSONS := $(ADMIN_ROOT)/lessons
+ADMIN_QUIZ := $(ADMIN_ROOT)/quiz
+ADMIN_USER := $(ADMIN_ROOT)/user
+
+# MODULES (INSTRUCTOR)
+INST_ASSIGNMENT := $(INSTRUCTOR_ROOT)/assignments
+
+# ============================================================
+# GLOBAL
+# ============================================================
 
 test-all:
 	@echo "🔥 Running ALL tests..."
@@ -23,125 +31,47 @@ test-all:
 test-verbose:
 	@echo "🔍 Running ALL tests (verbose)..."
 	mkdir -p reports
-	pytest --verbose $(REPORT_OPTS)
+	pytest -v $(REPORT_OPTS)
 
-# --------------------------------------------------------------------
-# 2. Role-based
-# --------------------------------------------------------------------
+# ============================================================
+# ADMIN GROUP
+# ============================================================
 
 test-admin:
-	@echo "▶️ Admin tests..."
+	@echo "▶️ Running ADMIN tests..."
 	mkdir -p reports
 	pytest $(ADMIN_ROOT) $(REPORT_OPTS)
 
-test-instructor:
-	@echo "▶️ Instructor tests..."
+test-admin-assignments:
+	@echo "▶️ ADMIN - Assignments"
 	mkdir -p reports
-	pytest $(INST_ROOT) $(REPORT_OPTS)
+	pytest $(ADMIN_ASSIGNMENT) $(REPORT_OPTS)
 
-# --------------------------------------------------------------------
-# 3. Admin Modules
-# --------------------------------------------------------------------
+test-admin-lessons:
+	@echo "▶️ ADMIN - Lessons"
+	mkdir -p reports
+	pytest $(ADMIN_LESSONS) $(REPORT_OPTS)
 
 test-admin-quiz:
-	@echo "▶️ Admin Quiz tests..."
+	@echo "▶️ ADMIN - Quiz"
 	mkdir -p reports
-	pytest $(ADMIN_ROOT)/quiz $(REPORT_OPTS)
+	pytest $(ADMIN_QUIZ) $(REPORT_OPTS)
 
 test-admin-user:
-	@echo "▶️ Admin User tests..."
+	@echo "▶️ ADMIN - User"
 	mkdir -p reports
-	pytest $(ADMIN_ROOT)/user $(REPORT_OPTS)
+	pytest $(ADMIN_USER) $(REPORT_OPTS)
 
-test-admin-assignment:
-	@echo "▶️ Admin Assignment tests..."
+# ============================================================
+# INSTRUCTOR GROUP
+# ============================================================
+
+test-instructor:
+	@echo "▶️ Running INSTRUCTOR tests..."
 	mkdir -p reports
-	pytest $(ASSIGNMENT_DIR) $(REPORT_OPTS)
+	pytest $(INSTRUCTOR_ROOT) $(REPORT_OPTS)
 
-# --------------------------------------------------------------------
-# 4. Quiz List
-# --------------------------------------------------------------------
-
-test-quiz-list-all:
+test-instructor-assignments:
+	@echo "▶️ INSTRUCTOR - Assignments"
 	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR) $(REPORT_OPTS)
-
-test-quiz-add:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_create_new_add.py $(REPORT_OPTS)
-
-test-quiz-add-delete:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_create_new_delete.py $(REPORT_OPTS)
-
-test-quiz-add-edit:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_create_new_edit.py $(REPORT_OPTS)
-
-test-quiz-del:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_action_delete.py $(REPORT_OPTS)
-
-test-quiz-search:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_search.py $(REPORT_OPTS)
-
-test-quiz-preview:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_action_preview.py $(REPORT_OPTS)
-
-test-quiz-submission:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_action_quiz_submission.py $(REPORT_OPTS)
-
-# --------------------------------------------------------------------
-# 5. Group
-# --------------------------------------------------------------------
-
-test-group-add:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_edit_group_add.py $(REPORT_OPTS)
-
-test-group-del:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_edit_group_delete.py $(REPORT_OPTS)
-
-test-group-edit:
-	mkdir -p reports
-	pytest $(QUIZ_LIST_DIR)/test_edit_group_edit.py $(REPORT_OPTS)
-
-# --------------------------------------------------------------------
-# 6. Assignment
-# --------------------------------------------------------------------
-
-test-assignment-all:
-	mkdir -p reports
-	pytest $(ASSIGNMENT_DIR) $(REPORT_OPTS)
-
-test-assignment-add:
-	mkdir -p reports
-	pytest $(ASSIGNMENT_DIR)/test_add_course.py $(REPORT_OPTS)
-
-test-assignment-delete:
-	mkdir -p reports
-	pytest $(ASSIGNMENT_DIR)/test_delete_course.py $(REPORT_OPTS)
-
-test-assignment-edit:
-	mkdir -p reports
-	pytest $(ASSIGNMENT_DIR)/test_edit_course.py $(REPORT_OPTS)
-
-# --------------------------------------------------------------------
-# 7. Result
-# --------------------------------------------------------------------
-
-test-score-edit:
-	mkdir -p reports
-	pytest $(ADMIN_ROOT)/quiz/result/test_edit_score.py $(REPORT_OPTS)
-
-# --------------------------------------------------------------------
-# 8. Marker
-# --------------------------------------------------------------------
-
-test-smoke:
-	mkdir -p reports
-	pytest -m smoke $(REPORT_OPTS)
+	pytest $(INST_ASSIGNMENT) $(REPORT_OPTS)
