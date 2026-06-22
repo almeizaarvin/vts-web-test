@@ -204,3 +204,54 @@ def find_row_by_name(driver, wait, name):
     except TimeoutException:
         raise Exception(f"❌ Row dengan nama '{name}' tidak ditemukan!")    
 
+
+
+def wait_for_toast(wait, timeout=5):
+    """
+    Menunggu dan memverifikasi Toastify success message.
+    
+    Args:
+        wait: WebDriverWait instance
+        timeout: Waktu tunggu maksimal (default: 5 detik)
+    
+    Returns:
+        WebElement: Toast success element
+    
+    Raises:
+        AssertionError: Jika toast tidak muncul dalam waktu timeout
+    """
+    toast_class = "Toastify__toast--success"
+    try:
+        success_toast = wait.until(
+            EC.presence_of_element_located((By.CLASS_NAME, toast_class)),
+            f"❌ Timeout: Toast sukses ({toast_class}) tidak muncul dalam {timeout} detik."
+        )
+        print("✅ Success Toast muncul!")
+        return success_toast
+    except TimeoutException as e:
+        raise AssertionError(f"❌ Gagal memverifikasi Toast sukses: {e}")
+
+
+def safe_click(driver, element, retries=3, wait_time=0.8):
+    """
+    Klik elemen dengan retry dan scroll ke view.
+    Menggunakan JavaScript untuk menghindari ElementClickInterceptedException.
+    
+    Args:
+        driver: WebDriver instance
+        element: WebElement yang akan diklik
+        retries: Jumlah percobaan (default: 3)
+        wait_time: Waktu tunggu antar retry dalam detik (default: 0.8)
+    
+    Raises:
+        RuntimeError: Jika gagal klik setelah beberapa percobaan
+    """
+    for i in range(retries):
+        try:
+            driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            driver.execute_script("arguments[0].click();", element)
+            return
+        except Exception as e:
+            print(f"⚠️ Click intercepted (attempt {i+1}/{retries}): {e}")
+            time.sleep(wait_time)
+    raise RuntimeError("Gagal klik elemen setelah beberapa percobaan.")

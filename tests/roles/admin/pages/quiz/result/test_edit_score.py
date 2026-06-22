@@ -14,7 +14,6 @@
 # # Asumsi: wait_for_toast juga sudah tersedia untuk verifikasi sukses.
 
 
-
 # @pytest.mark.usefixtures("login_as_admin_fixture")
 # def test_action_quiz_submission(login_as_admin_fixture):
 #     """
@@ -66,7 +65,7 @@
 #         print(f"🔍 Mencari dan mengklik tombol 'Review' di row pertama...")
         
 #         # LOKATOR DIPERBAIKI: Menggunakan wait.until untuk memastikan tombol siap diklik
-#         review_btn_locator = (By.XPATH, "//button[.//svg[@aria-label='Review']]")
+#         review_btn_locator = (By.XPATH, "/html/body/div[1]/main/div/div/div[1]/div/div[2]/div[2]/div/div/div[2]/div[1]/div/table/tbody/tr[1]/td[10]/button")
 #         review_btn = wait.until(EC.element_to_be_clickable(review_btn_locator)) 
         
 #         safe_click(driver, review_btn)
@@ -76,7 +75,7 @@
 
 #         # 4. Cari tombol edit (EditIcon)
 #         # LOKATOR DIPERBAIKI: Menggunakan data-testid="EditIcon" (sesuai prompt)
-#         edit_icon_locator = (By.XPATH, "//button[.//svg[@data-testid='EditIcon']]")
+#         edit_icon_locator = (By.XPATH, "/html/body/div[1]/main/div/div/div[1]/div/div[2]/div[2]/div/div[4]/div[1]/div[2]/button/svg")
         
 #         # Ambil tombol edit pertama
 #         edit_buttons = wait.until(EC.presence_of_all_elements_located(edit_icon_locator))
@@ -87,7 +86,7 @@
 #         print("✅ Berhasil mengklik tombol EditIcon pertama.")
 
 #         # 5. Cari input 'score', simpan nilai lama, dan isi nilai baru
-#         score_input_locator = (By.NAME, "score")
+#         score_input_locator = (By.XPATH, "//*[@id='score']")
 #         score_input = wait.until(EC.visibility_of_element_located(score_input_locator))
         
 #         old_score = score_input.get_attribute("placeholder")

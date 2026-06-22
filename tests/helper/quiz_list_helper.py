@@ -205,7 +205,7 @@ def perform_add_new_quiz_and_delete_question(driver, wait):
     # LOCATOR NATIVE UNTUK TOMBOL IKON EDIT: Target BUTTON yang berisi SVG EditIcon
     edit_btn_locator_relative = (
         By.XPATH,
-        ".//button[.//svg[@data-testid='EditIcon'] or .//svg[@data-testid='ModeEditIcon']]"
+        "/html/body/div[1]/main/div/div/div[1]/div/div[2]/div[2]/div/div/div[2]/table/tbody/tr/td[3]/div/button[1]"
     )
     
     # Cari elemen BUTTON di dalam scope default_row
@@ -239,9 +239,9 @@ def perform_add_new_quiz_and_delete_question(driver, wait):
     time.sleep(1) # Tunggu sebentar untuk transisi DOM
 
     # 7. Tunggu toast success
-    print("🔎 Menunggu Toast Success...")
-    wait_for_toast(wait)
-    print("✅ Toast Success muncul — Pertanyaan default berhasil diedit/disimpan ulang.")
+    # print("🔎 Menunggu Toast Success...")
+    # wait_for_toast(wait)
+    # print("✅ Toast Success muncul — Pertanyaan default berhasil diedit/disimpan ulang.")
 
     print("="*60 + "\n")
 

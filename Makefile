@@ -4,12 +4,12 @@
 
 .DEFAULT_GOAL := test-all
 
-# REPORT: RELATIVE ke workspace Jenkins
 REPORT_OPTS := --html=reports/report.html --self-contained-html --disable-warnings -q
 
 ADMIN_ROOT := tests/roles/admin/pages
 INST_ROOT := tests/roles/instructor/pages
 QUIZ_LIST_DIR := $(ADMIN_ROOT)/quiz/quiz_list
+ASSIGNMENT_DIR := $(ADMIN_ROOT)/assignments
 
 # --------------------------------------------------------------------
 # 1. Global
@@ -52,6 +52,11 @@ test-admin-user:
 	@echo "▶️ Admin User tests..."
 	mkdir -p reports
 	pytest $(ADMIN_ROOT)/user $(REPORT_OPTS)
+
+test-admin-assignment:
+	@echo "▶️ Admin Assignment tests..."
+	mkdir -p reports
+	pytest $(ASSIGNMENT_DIR) $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
 # 4. Quiz List
@@ -106,7 +111,27 @@ test-group-edit:
 	pytest $(QUIZ_LIST_DIR)/test_edit_group_edit.py $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
-# 6. Result
+# 6. Assignment
+# --------------------------------------------------------------------
+
+test-assignment-all:
+	mkdir -p reports
+	pytest $(ASSIGNMENT_DIR) $(REPORT_OPTS)
+
+test-assignment-add:
+	mkdir -p reports
+	pytest $(ASSIGNMENT_DIR)/test_add_course.py $(REPORT_OPTS)
+
+test-assignment-delete:
+	mkdir -p reports
+	pytest $(ASSIGNMENT_DIR)/test_delete_course.py $(REPORT_OPTS)
+
+test-assignment-edit:
+	mkdir -p reports
+	pytest $(ASSIGNMENT_DIR)/test_edit_course.py $(REPORT_OPTS)
+
+# --------------------------------------------------------------------
+# 7. Result
 # --------------------------------------------------------------------
 
 test-score-edit:
@@ -114,7 +139,7 @@ test-score-edit:
 	pytest $(ADMIN_ROOT)/quiz/result/test_edit_score.py $(REPORT_OPTS)
 
 # --------------------------------------------------------------------
-# 7. Marker
+# 8. Marker
 # --------------------------------------------------------------------
 
 test-smoke:
