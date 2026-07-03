@@ -13,11 +13,17 @@ INSTRUCTOR_ROOT := tests/roles/instructor/pages
 # MODULES (ADMIN)
 ADMIN_ASSIGNMENT := $(ADMIN_ROOT)/assignments
 ADMIN_LESSONS := $(ADMIN_ROOT)/lessons
+
 ADMIN_QUIZ := $(ADMIN_ROOT)/quiz
-ADMIN_USER := $(ADMIN_ROOT)/user
+ADMIN_QUIZ_LIST := $(ADMIN_QUIZ)/quiz_list
+ADMIN_QUIZ_RESULT := $(ADMIN_QUIZ)/quiz/result
+
+ADMIN_USER_INSTRUCTOR := $(ADMIN_ROOT)/user/instructor
+ADMIN_USER_TRAINEE := $(ADMIN_ROOT)/user/trainee
 
 # MODULES (INSTRUCTOR)
 INST_ASSIGNMENT := $(INSTRUCTOR_ROOT)/assignments
+INST_LESSONS := $(INSTRUCTOR_ROOT)/lessons
 
 # ============================================================
 # GLOBAL
@@ -57,10 +63,30 @@ test-admin-quiz:
 	mkdir -p reports
 	pytest $(ADMIN_QUIZ) $(REPORT_OPTS)
 
+test-admin-quiz-list:
+	@echo "▶️ ADMIN - Quiz List"
+	mkdir -p reports
+	pytest $(ADMIN_QUIZ_LIST) $(REPORT_OPTS)
+
+test-admin-quiz-result:
+	@echo "▶️ ADMIN - Quiz Result"
+	mkdir -p reports
+	pytest $(ADMIN_QUIZ_RESULT) $(REPORT_OPTS)
+
 test-admin-user:
 	@echo "▶️ ADMIN - User"
 	mkdir -p reports
 	pytest $(ADMIN_USER) $(REPORT_OPTS)
+
+test-admin-user-instructor:
+	@echo "▶️ ADMIN - User Instructor"
+	mkdir -p reports
+	pytest $(ADMIN_USER_INSTRUCTOR) $(REPORT_OPTS)
+
+test-admin-user-trainee:
+	@echo "▶️ ADMIN - User Trainee"
+	mkdir -p reports
+	pytest $(ADMIN_USER_TRAINEE) $(REPORT_OPTS)
 
 # ============================================================
 # INSTRUCTOR GROUP
@@ -75,3 +101,9 @@ test-instructor-assignments:
 	@echo "▶️ INSTRUCTOR - Assignments"
 	mkdir -p reports
 	pytest $(INST_ASSIGNMENT) $(REPORT_OPTS)
+
+test-instructor-lessons:
+	@echo "▶️ INSTRUCTOR - Lessons"
+	mkdir -p reports
+	pytest $(INST_LESSONS) $(REPORT_OPTS)
+
