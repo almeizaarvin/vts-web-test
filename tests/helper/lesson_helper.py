@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-from tests.helper.general_helper import navigate_to_page_button, wait_for_toast
+from tests.helper.general_helper import navigate_to_page_button, safe_click, wait_for_toast
 
 
 # =========================================================
@@ -295,3 +295,98 @@ def edit_chapter(driver, wait, old_name, new_name):
     print("✅ Save success")
 
     time.sleep(1)
+
+
+def perform_delete_chapter_and_restore(
+    driver,
+    wait,
+    chapter_name="Chapter Testing",
+    module_name="Module Testing"
+):
+
+    print("\n" + "=" * 60)
+    print("🗑 LESSONS - DELETE FLOW")
+    print("=" * 60)
+
+    # =====================================================
+    # 1. Open Lessons -> Others
+    # =====================================================
+    navigate_to_page_button(driver, wait, "Lessons")
+    navigate_to_lessons_others(driver, wait)
+
+    time.sleep(1)
+
+    # =====================================================
+    # 2. Cari row chapter
+    # =====================================================
+    rows = wait.until(
+        EC.presence_of_all_elements_located(
+            (By.XPATH, "//table//tbody/tr")
+        )
+    )
+
+    target_row = None
+
+    for row in rows:
+        text = row.text.strip()
+
+        if chapter_name in text:
+            target_row = row
+            print(f"✅ Chapter ditemukan : {chapter_name}")
+            break
+
+    assert target_row is not None, \
+        f"Chapter '{chapter_name}' tidak ditemukan"
+
+    # =====================================================
+    # 3. Klik Delete (button pertama)
+    # =====================================================
+    delete_btn = target_row.find_element(
+        By.XPATH,
+        ".//td[1]//button[1]"
+    )
+
+    safe_click(driver, delete_btn)
+
+    print("🗑 Delete dialog opened")
+
+    # =====================================================
+    # 4. Confirm Delete
+    # =====================================================
+    confirm_btn = wait.until(
+        EC.element_to_be_clickable(
+            (
+                By.XPATH,
+                "/html/body/div[1]/div/div[3]/div/div[2]/button[1]"
+            )
+        )
+    )
+
+    safe_click(driver, confirm_btn)
+
+    print("✅ Delete confirmed")
+
+    # =====================================================
+    # 5. Verify Toast
+    # =====================================================
+    wait_for_toast(wait)
+
+    print("✅ Delete success")
+
+    # =====================================================
+    # 6. Restore state
+    # =====================================================
+    print("♻ Restoring deleted chapter...")
+
+    result = perform_add_chapter(
+        driver,
+        wait,
+        chapter_name=chapter_name,
+        module_name=module_name
+    )
+
+    assert result is True, "Restore chapter gagal"
+
+    print("✅ State restored")
+
+    print("=" * 60)
