@@ -32,9 +32,14 @@ def navigate_to_page_button(driver, wait, button_text):
         # Jika kamu punya helper 'safe_click', lebih baik ganti baris ini:
         # safe_click(driver, page_tab)
         
-        driver.execute_script("arguments[0].scrollIntoView(true);", page_tab)
-        page_tab.click() 
-        
+        driver.execute_script("""
+            arguments[0].scrollIntoView({
+                block:'center'
+            });
+        """, page_tab)
+
+        safe_click(driver, page_tab)
+
         print(f"✅ Berhasil pindah ke subpage '{button_text}'.")
         
     except TimeoutException:
