@@ -25,6 +25,10 @@ ADMIN_USER_TRAINEE := $(ADMIN_ROOT)/user/trainee
 INST_ASSIGNMENT := $(INSTRUCTOR_ROOT)/assignments
 INST_LESSONS := $(INSTRUCTOR_ROOT)/lessons
 
+INST_QUIZ := $(INSTRUCTOR_ROOT)/quiz
+INST_QUIZ_LIST := $(INST_QUIZ)/quiz_list
+INST_QUIZ_RESULT := $(INST_QUIZ)/quiz/result
+
 # ============================================================
 # GLOBAL
 # ============================================================
@@ -107,3 +111,17 @@ test-instructor-lessons:
 	mkdir -p reports
 	pytest $(INST_LESSONS) $(REPORT_OPTS)
 
+test-instructor-quiz:
+	@echo "▶️ INSTRUCTOR - Quiz"
+	mkdir -p reports
+	pytest $(INST_QUIZ) $(REPORT_OPTS)
+
+test-instructor-quiz-list:
+	@echo "▶️ INSTRUCTOR - Quiz List"
+	mkdir -p reports
+	pytest $(INST_QUIZ_LIST) $(REPORT_OPTS)
+
+test-instructor-quiz-result:
+	@echo "▶️ INSTRUCTOR - Quiz Result"
+	mkdir -p reports
+	pytest $(INST_QUIZ_RESULT) $(REPORT_OPTS)
