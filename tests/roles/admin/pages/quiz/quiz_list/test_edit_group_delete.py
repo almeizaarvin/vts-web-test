@@ -1,7 +1,7 @@
 import pytest
 from selenium.webdriver.support.ui import WebDriverWait
 from tests.helper.edit_group_helper import *
-from tests.helper.quiz_list_helper import navigate_to_page_button
+from tests.helper.general_helper import navigate_to_page_button
 
 @pytest.mark.usefixtures("login_as_admin_fixture")
 def test_delete_group(login_as_admin_fixture):

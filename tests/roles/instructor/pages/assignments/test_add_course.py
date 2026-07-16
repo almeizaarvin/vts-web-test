@@ -16,6 +16,8 @@ def test_add_new_course(login_as_instructor_fixture):
 
     # Tentukan nama course yang akan diuji
     TEST_COURSE_NAME = "Course Testing"
+
+    navigate_to_page_button(driver, wait, "Assignment")
     
     # Panggil fungsi helper untuk melakukan seluruh skenario Add Course
     result = add_course_to_assignment(driver, wait, course_name=TEST_COURSE_NAME)

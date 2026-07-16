@@ -16,8 +16,9 @@ ADMIN_LESSONS := $(ADMIN_ROOT)/lessons
 
 ADMIN_QUIZ := $(ADMIN_ROOT)/quiz
 ADMIN_QUIZ_LIST := $(ADMIN_QUIZ)/quiz_list
-ADMIN_QUIZ_RESULT := $(ADMIN_QUIZ)/quiz/result
+ADMIN_QUIZ_RESULT := $(ADMIN_ROOT)/quiz/result
 
+ADMIN_USER := $(ADMIN_ROOT)/user
 ADMIN_USER_INSTRUCTOR := $(ADMIN_ROOT)/user/instructor
 ADMIN_USER_TRAINEE := $(ADMIN_ROOT)/user/trainee
 
@@ -27,7 +28,10 @@ INST_LESSONS := $(INSTRUCTOR_ROOT)/lessons
 
 INST_QUIZ := $(INSTRUCTOR_ROOT)/quiz
 INST_QUIZ_LIST := $(INST_QUIZ)/quiz_list
-INST_QUIZ_RESULT := $(INST_QUIZ)/quiz/result
+INST_QUIZ_RESULT := $(INSTRUCTOR_ROOT)/quiz/result
+
+INST_TRAINEE := $(INSTRUCTOR_ROOT)/trainee
+INST_TRAINEE_QUIZ_LIST := $(INST_TRAINEE)/quiz/quiz list
 
 # ============================================================
 # GLOBAL
@@ -125,3 +129,13 @@ test-instructor-quiz-result:
 	@echo "▶️ INSTRUCTOR - Quiz Result"
 	mkdir -p reports
 	pytest $(INST_QUIZ_RESULT) $(REPORT_OPTS)
+
+test-instructor-trainee:
+	@echo "▶️ INSTRUCTOR - Trainee"
+	mkdir -p reports
+	pytest $(INST_TRAINEE) $(REPORT_OPTS)
+
+test-instructor-trainee-quiz-list:
+	@echo "▶️ INSTRUCTOR - Trainee Quiz List"
+	mkdir -p reports
+	pytest "$(INST_TRAINEE_QUIZ_LIST)" $(REPORT_OPTS)

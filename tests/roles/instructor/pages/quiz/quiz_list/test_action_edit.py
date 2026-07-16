@@ -22,6 +22,3 @@ def test_edit_quiz(login_as_instructor_fixture):
         old_question="Pertanyaan 1 esai",
         new_question="Pertanyaan Edited"
     )
-
-    print("QUIZ =", "Pilihan Ganda")
-    print("OLD =", "Pertanyaan 1 esai")
